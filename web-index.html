@@ -1,0 +1,295 @@
+<html>
+    <style>
+        #textbox{
+          display:none;
+        }
+
+        #imagebox{
+          display:none;
+        }
+
+        #selectedImagesList{
+          color: rgba(238, 238, 238, 0.7);
+        }
+
+        body {
+          height: 100%;
+          background: url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/50598/concrete-wall-background.jpg) center center fixed;
+          background-size: cover;
+        }
+
+        .shade {
+          overflow: auto;
+          position: absolute;
+          top: 0;
+          left: 0;
+          bottom: 0;
+          right: 0;
+          background-image: linear-gradient( 150deg, rgba(0, 0, 0, 0.65), transparent);
+        }
+
+        .blackboard {
+          position: relative;
+          width: 640px;
+          margin: 7% auto;
+          border: tan solid 12px;
+          border-top: #bda27e solid 12px;
+          border-left: #b19876 solid 12px;
+          border-bottom: #c9ad86 solid 12px;
+          box-shadow: 0px 0px 6px 5px rgba(58, 18, 13, 0), 0px 0px 0px 2px #c2a782, 0px 0px 0px 4px #a58e6f, 3px 4px 8px 5px rgba(0, 0, 0, 0.5);
+          background-image: radial-gradient( circle at left 30%, rgba(34, 34, 34, 0.3), rgba(34, 34, 34, 0.3) 80px, rgba(34, 34, 34, 0.5) 100px, rgba(51, 51, 51, 0.5) 160px, rgba(51, 51, 51, 0.5)), linear-gradient( 215deg, transparent, transparent 100px, #222 260px, #222 320px, transparent), radial-gradient( circle at right, #111, rgba(51, 51, 51, 1));
+          background-color: #333;
+        }
+
+        .blackboard:before {
+          box-sizing: border-box;
+          display: block;
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          background-image: linear-gradient( 175deg, transparent, transparent 40px, rgba(120, 120, 120, 0.1) 100px, rgba(120, 120, 120, 0.1) 110px, transparent 220px, transparent), linear-gradient( 200deg, transparent 80%, rgba(50, 50, 50, 0.3)), radial-gradient( ellipse at right bottom, transparent, transparent 200px, rgba(80, 80, 80, 0.1) 260px, rgba(80, 80, 80, 0.1) 320px, transparent 400px, transparent);
+          border: #2c2c2c solid 2px;
+          content: "Treasure Hunt Generator";
+          font-family: 'Calibri';
+          font-size: 2.3em;
+          color: rgba(238, 238, 238, 0.7);
+          text-align: center;
+          padding-top: 20px;
+        }
+
+        .form {
+          padding: 70px 20px 20px;
+        }
+
+        p {
+          position: relative;
+          margin-bottom: 1em;
+        }
+
+        label {
+          vertical-align: middle;
+          font-family: 'Calibri';
+          font-size: 1.2em;
+          color: rgba(238, 238, 238, 0.7);
+        }
+
+        p:nth-of-type(5) > label {
+          vertical-align: top;
+        }
+
+        input,
+        textarea {
+          vertical-align: middle;
+          padding-left: 10px;
+          background: none;
+          border: none;
+          font-family: 'Calibri';
+          font-size: 1.6em;
+          color: rgba(238, 238, 238, 0.8);
+          line-height: .6em;
+          outline: none;
+        }
+
+        textarea {
+          height: 120px;
+          font-size: 1.4em;
+          line-height: 1em;
+          resize: none;
+        }
+
+        input[type="file"] {
+          cursor: pointer;
+          color: rgba(238, 238, 238, 0.7);
+          line-height: 1em;
+          padding: 0;
+        }
+
+        input[type="image"] {
+          cursor: pointer;
+          color: rgba(238, 238, 238, 0.7);
+          line-height: 1em;
+          padding: 0;
+        }
+
+        input[type="submit"] {
+          cursor: pointer;
+          color: rgba(238, 238, 238, 0.7);
+          line-height: 1em;
+          padding: 0;
+        }
+
+        input[type="submit"]:focus {
+          background: rgba(238, 238, 238, 0.2);
+          color: rgba(238, 238, 238, 0.2);
+        }
+
+        ::-moz-selection {
+          background: rgba(238, 238, 238, 0.2);
+          color: rgba(238, 238, 238, 0.2);
+          text-shadow: none;
+        }
+
+        ::selection {
+          background: rgba(238, 238, 238, 0.4);
+          color: rgba(238, 238, 238, 0.3);
+          text-shadow: none;
+        }
+    </style>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.8.0/jszip.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.8.0/xlsx.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+
+    <body class="main">
+
+    <div class="shade">
+      <div class="blackboard">
+        <div class="form">
+          <p>
+            <label for="input_file_path">Input Excel File Name</label>
+            <input id="input_file_path" type=file>
+          </p>
+          <div id="textbox" class="form-group">
+              <textarea class="form-control" rows=35 cols=120 id="input_file_contents"></textarea>
+          </div>
+          <p>
+            <label for="image_file_path">Input Image Name</label>
+            <input id="image_file_path" type=file onchange='handleImageSelect(this)' multiple>
+          </p>
+          <div id="selectedImagesList"> </div>
+          <div id="imagebox" class="form-group"> </div>
+          <p>
+            <label for="quiz_name">Treasure Hunt Name</label>
+            <input type="text" class="form-control" id="quiz_name" name="quiz_name">
+          </p>
+          <p>
+            <label for="mode">Mode (Classroom/Test)</label>
+            <select class="form-control" id="mode" name="mode">
+                <option selected="true">Classroom</option>
+                <option>Test</option>
+            </select>
+          </p>
+          <p>
+            <label for="crypt">Cryptogram String</label>
+            <input type="text" class="form-control" id="crypt" name="crypt">
+          </p>
+          <p>
+            <label for="author_name">Author Name</label>
+            <input type="text" class="form-control" id="author_name" name="author_name">
+          </p>
+          <p>
+            <label for="date">Date</label>
+            <input type="text" class="form-control" id="date" name="date">
+          </p>
+          <p>
+            <button style="margin:5px;" type="button" class="btn" onclick="submitFormTH()">Generate Treasure Hunt PDF</button>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    </body>
+
+    <script>
+        var count = 0;
+        var selectedImages = [];
+
+        function submitFormTH(){
+            request = {}
+            keys = ['input_file_path', 'input_file_contents', 'quiz_name', 'mode', 'crypt', 'author_name', 'date'];
+            for(var i = 0; i < keys.length; i += 1)
+            {
+                key = keys[i];
+                value = document.getElementById(keys[i]).value;
+                request[key] = value;
+            }
+            request['num_images'] = count;
+            for (var i = 0; i < count; i += 1) {
+              key = 'image_file_path'+i;
+              value = selectedImages[i];
+              request[key] = value;
+              key = 'image_file_contents'+i;
+              value = document.getElementById('image_file_contents'+i).value;
+              request[key] = value;
+            }
+            var xhr = new XMLHttpRequest();
+            var url = "";
+            xhr.open("POST", url, true);
+            xhr.setRequestHeader("Content-Type", "application/pdf");
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                  var jsonResponse = JSON.parse(xhr.responseText);
+                  if (jsonResponse['exception_message'] !== "") {
+                    alert(jsonResponse['exception_message']) ? "" : window.location.reload();
+                  }
+                  else {
+                    var fileURL = 'localhost:8086/' + jsonResponse['pdf_attachment'];
+                    window.open(fileURL, '_blank');
+                  }
+                }
+            };
+            var data = JSON.stringify(request);
+            xhr.send(data);
+        }
+
+        var ExcelToJSON = function() {
+            this.parseExcel = function(file) {
+              var reader = new FileReader();
+
+              reader.onload = function(e) {
+                var data = e.target.result;
+                var workbook = XLSX.read(data, {
+                  type: 'binary'
+                });
+                workbook.SheetNames.forEach(function(sheetName) {
+                  var XL_row_object = XLSX.utils.sheet_to_row_object_array(workbook.Sheets[sheetName]);
+                  var json_object = JSON.stringify(XL_row_object);
+                  jQuery( '#input_file_contents' ).val( json_object );
+                })
+              };
+
+              reader.onerror = function(ex) {
+                console.log(ex);
+              };
+
+              reader.readAsBinaryString(file);
+            };
+        };
+
+        function handleFileSelect(evt) {
+          var files = evt.target.files;
+          var xl2json = new ExcelToJSON();
+          xl2json.parseExcel(files[0]);
+        }
+
+        function getImgData(input, i) {
+          var reader = new FileReader();
+          var file = input.files[i];
+          reader.onload = function(e) {
+            var data = event.target.result.replace("data:"+ file.type +";base64,", '');
+            jQuery( '#image_file_contents'+i ).val( data );
+          };
+          reader.readAsDataURL(file);
+        }
+
+        function handleImageSelect(input) {
+          var input = document.getElementById('image_file_path');
+          var output = document.getElementById('selectedImagesList');
+          var children = "";
+          count = input.files.length;
+          for (var i = 0; i < count; ++i) {
+              children += '<li>' + input.files.item(i).name + '</li>';
+              $('#imagebox').append('<textarea class="form-control" rows=35 cols=120 id="image_file_contents'+i+'"></textarea>');
+              getImgData(input, i);
+              selectedImages.push(input.files.item(i).name);
+          }
+          output.innerHTML = '<ul>'+children+'</ul>';
+        }
+
+        document.getElementById('input_file_path').addEventListener('change', handleFileSelect, false);
+
+    </script>
+</html>
